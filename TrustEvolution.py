@@ -1,26 +1,34 @@
 import random
-from Players import Player,Generous,Selfish,RandomPlayer,CopyCat,Grudger,Detective
+from Players import Player,Generous,Selfish,RandomPlayer,CopyCat,Grudger,Detective,Simpleton,Copykitten
 class Game:
     def __init__(self):
         self.players = []
-        self.num_rounds = 10
-        self.num_players = int(input("how many players you want to have: "))
-        self.num_replace = int(input("how many players you want to replace: "))
+        self.num_rounds = 0
+        self.num_players = 0
+        self.num_replace = 0
         self.num_copycat=0
         self.num_selfish=0
         self.num_generous=0
         self.num_grudger=0
         self.num_detective=0
+        self.num_simpleton=0
+        self.num_copykitten=0
+        self.num_random=0
 
     def create_players(self):
         while True:
             try:
-                self.num_copycat = int(input("Enter the number of CopyCat players: "))
-                self.num_selfish = int(input("Enter the number of Selfish players: "))
+                self.num_players = int(input("How many players do you want to have: "))
+                self.num_rounds = int(input("How many rounds players play: "))
+                self.num_replace = int(input("How many players do you want to replace: "))
                 self.num_generous = int(input("Enter the number of Generous players: "))
-                self.num_grudger = int(input("Enter the number of Grudger players: "))
-                self.num_detective = int(input("Enter the number of Detective players: "))
-            
+                self.num_selfish = 0 if self.num_generous == self.num_players else int(input("Enter the number of Selfish players: "))
+                self.num_copycat = 0 if self.num_generous + self.num_selfish == self.num_players else int(input("Enter the number of CopyCat players: "))
+                self.num_grudger = 0 if self.num_generous + self.num_selfish + self.num_copycat == self.num_players else int(input("Enter the number of Grudger players: "))
+                self.num_detective = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger == self.num_players else int(input("Enter the number of Detective players: "))
+                self.num_simpleton = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective == self.num_players else int(input("Enter the number of Simpleton players: "))
+                self.num_copykitten = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton == self.num_players else int(input("Enter the number of Copykitten players: "))
+                self.num_random = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton + self.num_copykitten== self.num_players else int(input("Enter the number of Random players: "))
                 break
             except ValueError:
                 print("Please enter a valid number.")
@@ -35,12 +43,19 @@ class Game:
             self.players.append(Grudger(f"Grudger Player {i+1}"))
         for i in range(self.num_detective):
             self.players.append(Detective(f"Detective Player {i+1}"))
+        for i in range(self.num_simpleton):
+            self.players.append(Simpleton(f"Simpleton Player {i+1}"))
+        for i in range(self.num_copykitten):
+            self.players.append(Copykitten(f"Copykitten Player {i+1}"))
+        for i in range(self.num_random):
+            self.players.append(RandomPlayer(f"RandomPlayer Player {i+1}"))            
 
-    def start(self):
-        self.create_players()
-        print(len(self.players))
-        print("Welcome to the Trust of Evolution game!")
-        print("Let's start...\n")
+    def start(self,iterate_num):
+        if iterate_num==1:
+            print("Welcome to the Trust of Evolution game!")
+            print("Let's start...\n")
+            self.create_players()
+        
 
         for i in range(len(self.players)):
             for j in range(i + 1, len(self.players)):
@@ -51,10 +66,10 @@ class Game:
                 player1_last_action = "Cooperate"
                 player2_last_action = "Cooperate"
 
-                print(f"{player1.name} vs {player2.name}:")
+                # print(f"{player1.name} vs {player2.name}:")
                 player1.money = player1.money
                 player2.money = player2.money
-                print(f"{player1.name} :{player1.money} vs {player2.name}:{player2.money} :")
+                # print(f"{player1.name} :{player1.money} vs {player2.name}:{player2.money} :")
                 for round_number in range(1, self.num_rounds + 1):
                     
 
@@ -80,44 +95,52 @@ class Game:
                     player1_last_action = action1  
                     player2_last_action = action2
 
-                print(f"{player1.name} final money: {player1.money}")
-                print(f"{player2.name} final money: {player2.money}")
-                print()
-        print("Game over!")
+        #         print(f"{player1.name} final money: {player1.money}")
+        #         print(f"{player2.name} final money: {player2.money}")
+        #         print()
+        # print("Game over!")
     def show_result(self):
         print("Final Results:")
         for player in self.players:
             print(f"{player.name}: {player.money}")
     def next_generation(self):
-        sorted_players = sorted(self.players, key=lambda player: player.money, reverse=True)
-        for player in sorted_players:
-            print(f"{player.name}: {player.money}")
-
-        print("Replacation:")
+        very_poors=[]
+        reaches = []
+        poors = []
         if len(self.players) > self.num_replace:
             money_values = {player.money for player in self.players}
             money_values = sorted(money_values)
             i=0
-            poors = []
-            while len(poors)<self.num_replace:
-                min_money = money_values.pop(i)
+            while len(poors) + len(very_poors) <self.num_replace:
+                if len(money_values)>1:
+                    min_money=min(money_values)
+                else:
+                    min_money=money_values[0]
                 for player in self.players:
                     if player.money == min_money:
                         poors.append(player)
+                if len(poors)<self.num_replace:
+                    for i in range(len(poors)):
+                        element=poors.pop(-1)
+                        very_poors.append(element)
+                    poors=[]
                 i+=1
             random.shuffle(poors)
-            very_poors=[]
-            for i in range(self.num_replace):
-                element=poors.pop(-1)
+            for i in range(len(very_poors), self.num_replace):
+                element = poors.pop(-1)
                 very_poors.append(element)
 
             j=-1
-            reaches = []
+            
             while len(self.players)-len(very_poors)+len(reaches)<self.num_players:
-                max_money = money_values.pop(j)
+                if len(money_values)>1:
+                    max_money=max(money_values)
+                else:
+                    max_money=money_values[0]
                 for player in self.players:
                     if player.money == max_money:
                         reaches.append(player)
+                        
                 j+=1
             random.shuffle(reaches)
             new_players = []
@@ -138,12 +161,24 @@ class Game:
                 elif isinstance(player, Detective):
                     new_players.append(Detective(f"Detective Player {self.num_detective + 1}"))
                     self.num_detective += 1    
+                
 
             self.players = [player for player in self.players if player not in very_poors]+new_players
-            sorted_players2 = sorted(self.players, key=lambda player: player.money, reverse=True)
-            for player in sorted_players2:
-                print(f"{player.name}: {player.money}")
-
+    def reset_player_money(self):
+        for player in self.players:
+            player.money = 0        
+    def announce_winner(self):
+        player=self.players[0]
+        if isinstance(player, CopyCat):
+            print("Winners are COPYCATS")     
+        elif isinstance(player, Selfish):
+            print("Winners are SELFISHES")
+        elif isinstance(player, Generous):
+            print("Winners are GENEROUSES")
+        elif isinstance(player, Grudger):
+            print("Winners are GRUDGERS")
+        elif isinstance(player, Detective):
+            print("Winners are DETECTIVES")
 
 
 
@@ -151,10 +186,21 @@ class Game:
 
 def main():
     game = Game()
-    game.start()
-    # game.show_result()
+    game.start(1)
+    game.show_result()
     game.next_generation()
-    
+    game.reset_player_money()
+    c=2
+    while len(set(type(player) for player in game.players)) > 1:
+        print(f"round number {c} started")
+        game.start(2)
+        game.show_result()  
+        game.next_generation()  
+        game.reset_player_money()  
+        c+=1
+
+    game.announce_winner()
+
 
 if __name__ == "__main__":
     main()
