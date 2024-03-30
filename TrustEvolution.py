@@ -114,16 +114,19 @@ class Game:
             while len(poors) + len(very_poors) <self.num_replace:
                 if len(money_values)>1:
                     min_money=min(money_values)
+                    money_values.remove(min_money)
                 else:
                     min_money=money_values[0]
                 for player in self.players:
                     if player.money == min_money:
                         poors.append(player)
-                if len(poors)<self.num_replace:
+                if len(poors)+ len(very_poors)<self.num_replace:
                     for i in range(len(poors)):
                         element=poors.pop(-1)
                         very_poors.append(element)
                     poors=[]
+                else:
+                    break
                 i+=1
             random.shuffle(poors)
             for i in range(len(very_poors), self.num_replace):
@@ -135,6 +138,7 @@ class Game:
             while len(self.players)-len(very_poors)+len(reaches)<self.num_players:
                 if len(money_values)>1:
                     max_money=max(money_values)
+                    money_values.remove(max_money)
                 else:
                     max_money=money_values[0]
                 for player in self.players:
