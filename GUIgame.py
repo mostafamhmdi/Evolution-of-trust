@@ -112,7 +112,7 @@ class GameGUI:
 
     def display_winner(self, winner):
         winner_label = tk.Label(self.master, text=winner)
-        winner_label.grid(row=5, column=0, columnspan=2, padx=10, pady=5)
+        winner_label.grid(row=14, column=0, columnspan=2, padx=10, pady=5)
 
 
 class Game:
@@ -190,35 +190,44 @@ class Game:
         return result
 
     def next_generation(self):
-        very_poors = []
+        very_poors=[]
         reaches = []
         poors = []
         if len(self.players) > self.num_replace:
             money_values = {player.money for player in self.players}
             money_values = sorted(money_values)
-            
-            while len(poors) + len(very_poors) < self.num_replace:
-                min_money = min(money_values)
+            i=0
+            while len(poors) + len(very_poors) <self.num_replace:
+                if len(money_values)>1:
+                    min_money=min(money_values)
+                else:
+                    min_money=money_values[0]
                 for player in self.players:
                     if player.money == min_money:
                         poors.append(player)
-                if len(poors) < self.num_replace:
-                    for _ in range(len(poors)):
-                        element = poors.pop(-1)
+                if len(poors)<self.num_replace:
+                    for i in range(len(poors)):
+                        element=poors.pop(-1)
                         very_poors.append(element)
-                    poors = []
-                
+                    poors=[]
+                i+=1
             random.shuffle(poors)
-            for _ in range(len(very_poors), self.num_replace):
+            for i in range(len(very_poors), self.num_replace):
                 element = poors.pop(-1)
                 very_poors.append(element)
 
-            while len(self.players) - len(very_poors) + len(reaches) < self.num_players:
-                max_money = max(money_values)
+            j=-1
+            
+            while len(self.players)-len(very_poors)+len(reaches)<self.num_players:
+                if len(money_values)>1:
+                    max_money=max(money_values)
+                else:
+                    max_money=money_values[0]
                 for player in self.players:
                     if player.money == max_money:
                         reaches.append(player)
                         
+                j+=1
             random.shuffle(reaches)
             new_players = []
         
@@ -237,9 +246,19 @@ class Game:
                     self.num_grudger += 1
                 elif isinstance(player, Detective):
                     new_players.append(Detective(f"Detective Player {self.num_detective + 1}"))
-                    self.num_detective += 1    
+                    self.num_detective += 1
+                elif isinstance(player, Simpleton):
+                    new_players.append(Simpleton(f"Simpleton Player {self.num_simpleton + 1}"))
+                    self.num_simpleton += 1  
+                elif isinstance(player, Copykitten):
+                    new_players.append(Copykitten(f"Copykitten Player {self.num_copykitten + 1}"))
+                    self.num_copykitten += 1  
+                elif isinstance(player, RandomPlayer):
+                    new_players.append(RandomPlayer(f"RandomPlayer Player {self.num_random + 1}"))
+                    self.num_random += 1      
                 
-            self.players = [player for player in self.players if player not in very_poors] + new_players
+
+            self.players = [player for player in self.players if player not in very_poors]+new_players
 
     def reset_player_money(self):
         for player in self.players:

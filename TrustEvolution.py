@@ -110,7 +110,7 @@ class Game:
         if len(self.players) > self.num_replace:
             money_values = {player.money for player in self.players}
             money_values = sorted(money_values)
-            
+            i=0
             while len(poors) + len(very_poors) <self.num_replace:
                 if len(money_values)>1:
                     min_money=min(money_values)
@@ -124,13 +124,13 @@ class Game:
                         element=poors.pop(-1)
                         very_poors.append(element)
                     poors=[]
-                
+                i+=1
             random.shuffle(poors)
             for i in range(len(very_poors), self.num_replace):
                 element = poors.pop(-1)
                 very_poors.append(element)
 
-            
+            j=-1
             
             while len(self.players)-len(very_poors)+len(reaches)<self.num_players:
                 if len(money_values)>1:
@@ -141,7 +141,7 @@ class Game:
                     if player.money == max_money:
                         reaches.append(player)
                         
-                
+                j+=1
             random.shuffle(reaches)
             new_players = []
         
@@ -160,7 +160,16 @@ class Game:
                     self.num_grudger += 1
                 elif isinstance(player, Detective):
                     new_players.append(Detective(f"Detective Player {self.num_detective + 1}"))
-                    self.num_detective += 1    
+                    self.num_detective += 1
+                elif isinstance(player, Simpleton):
+                    new_players.append(Simpleton(f"Simpleton Player {self.num_simpleton + 1}"))
+                    self.num_simpleton += 1  
+                elif isinstance(player, Copykitten):
+                    new_players.append(Copykitten(f"Copykitten Player {self.num_copykitten + 1}"))
+                    self.num_copykitten += 1  
+                elif isinstance(player, RandomPlayer):
+                    new_players.append(RandomPlayer(f"RandomPlayer Player {self.num_random + 1}"))
+                    self.num_random += 1    
                 
 
             self.players = [player for player in self.players if player not in very_poors]+new_players
@@ -179,6 +188,12 @@ class Game:
             print("Winners are GRUDGERS")
         elif isinstance(player, Detective):
             print("Winners are DETECTIVES")
+        elif isinstance(player, Copykitten):
+            print("Winners are Copykitten")
+        elif isinstance(player, Simpleton):
+            print("Winners are Simpleton")
+        elif isinstance(player, RandomPlayer):
+            print("Winners are RandomPlayer")
 
 
 
@@ -195,7 +210,8 @@ def main():
         print(f"round number {c} started")
         game.start(2)
         game.show_result()  
-        game.next_generation()  
+        game.next_generation()
+        game.show_result()  
         game.reset_player_money()  
         c+=1
 
