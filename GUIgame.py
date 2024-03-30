@@ -67,16 +67,24 @@ class GameGUI:
 
         # Button to start the game
         self.button_start = tk.Button(master, text="Start Game", command=self.start_game)
-        self.button_start.grid(row=11, column=0, columnspan=2, padx=10, pady=10)
+        self.button_start.grid(row=11, column=0, columnspan=2, padx=10, pady=10,sticky='w')
+
+        self.button_next_round = tk.Button(master, text="Next Round", command=self.show_next_round, state=tk.DISABLED)
+        self.button_next_round.grid(row=11, column=1, columnspan=1, padx=10, pady=10,sticky = 'E')
+
+        self.button_skip = tk.Button(master, text="Skip", command=self.skip_to_final_result, state=tk.DISABLED)
+        self.button_skip.grid(row=11, column=2, columnspan=1, padx=10, pady=10,sticky = "E")
 
         # Label to display the game result
         self.result_label = tk.Label(master, text="", wraplength=400)
         self.result_label.grid(row=12, column=0, columnspan=2, padx=10, pady=5)
 
-
+        self.current_round = 0
+    
 
 
     def start_game(self):
+        
         try:
             num_players = int(self.entry_players.get())
             num_rounds = int(self.entry_rounds.get())
@@ -96,16 +104,38 @@ class GameGUI:
             messagebox.showerror("Error", str(e))
             return
 
-        # Create and run the game
-        game = Game(num_players, num_rounds, num_replace, num_generous, num_selfish, num_copycat, num_grudger, num_detective, num_simpleton, num_copykitten, num_random)
-        game.start()
-        self.display_result(game.show_result())
-        while len(set(type(player) for player in game.players)) > 1:
-            game.next_generation()
-            game.reset_player_money()
-            game.start()
-            self.display_result(game.show_result())
-        self.display_winner(game.announce_winner())
+
+        self.game = Game(num_players, num_rounds, num_replace, num_generous, num_selfish, num_copycat, num_grudger, num_detective, num_simpleton, num_copykitten, num_random)
+        self.game.start()
+        self.display_result(self.game.show_result())
+        self.button_next_round.config(state=tk.NORMAL)
+        self.button_skip.config(state=tk.NORMAL)
+        self.button_start.config(state=tk.DISABLED)
+
+
+    def show_next_round(self):
+        if len(set(type(player) for player in self.game.players)) > 1:
+            self.game.next_generation()
+            self.game.reset_player_money()
+            self.game.start()
+            self.display_result(self.game.show_result())
+        else:
+            self.display_winner(self.game.announce_winner())
+            self.button_next_round.config(state=tk.DISABLED)
+            self.button_skip.config(state=tk.DISABLED)
+
+
+    def skip_to_final_result(self):
+        while len(set(type(player) for player in self.game.players)) > 1:
+            self.game.next_generation()
+            self.game.reset_player_money()
+            self.game.start()
+        self.display_result(self.game.show_result())
+        self.display_winner(self.game.announce_winner())
+        self.button_start.config(state=tk.NORMAL)
+        self.button_skip.config(state=tk.DISABLED)
+        self.button_next_round.config(state=tk.DISABLED)
+
 
     def display_result(self, result):
         self.result_label.config(text=result)
@@ -179,9 +209,9 @@ class Game:
 
                     player1_last_action = action1  
                     player2_last_action = action2
-        print("Final Results:")
-        for player in self.players:
-            print(f"{player.name}: {player.money}")
+        # print("Final Results:")
+        # for player in self.players:
+        #     print(f"{player.name}: {player.money}")
 
     def show_result(self):
         result = "Final Results:\n"
