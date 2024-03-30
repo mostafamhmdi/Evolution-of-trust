@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 import random
 from Players import CopyCat, Selfish, Generous, Grudger, Detective, Simpleton, Copykitten,RandomPlayer
-
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+import matplotlib.pyplot as plt
 
 class GameGUI:
     def __init__(self, master):
@@ -79,7 +80,11 @@ class GameGUI:
         self.result_label = tk.Label(master, text="", wraplength=400)
         self.result_label.grid(row=12, column=0, columnspan=2, padx=10, pady=5)
 
-        self.current_round = 0
+
+        self.rounds = []
+        self.player_counts = []
+        self.player_money = []
+        self.plot_index = 0
     
 
 
@@ -113,16 +118,49 @@ class GameGUI:
         self.button_start.config(state=tk.DISABLED)
 
 
+    def plot_data(self):
+        fig, axs = plt.subplots(3, 2, figsize=(6, 8)) 
+        axs[0, 0].plot(self.rounds, self.player_counts)
+        axs[0, 0].set_title('Player Counts')
+        axs[0, 1].plot(self.rounds, self.player_money)
+        axs[0, 1].set_title('Player Money')
+        # Add more plots as needed
+        plt.tight_layout()
+
+        # Convert matplotlib figure to Tkinter-compatible canvas
+        canvas = FigureCanvasTkAgg(fig, master=self.master)
+        canvas.draw()
+        canvas.get_tk_widget().grid(row=0, column=6, rowspan=15)
+
+        # Add toolbar
+        toolbar = NavigationToolbar2Tk(canvas, self.master)
+        toolbar.update()
+        canvas.get_tk_widget().grid(row=0, column=6, rowspan=15)
+
+    def update_plot_data(self):
+        self.plot_index += 1
+        self.rounds.append(self.plot_index)
+        self.player_counts.append(len(set(type(player) for player in self.game.players)))
+        total_money = sum(player.money for player in self.game.players)
+        self.player_money.append(total_money)
+
+
     def show_next_round(self):
         if len(set(type(player) for player in self.game.players)) > 1:
             self.game.next_generation()
             self.game.reset_player_money()
             self.game.start()
             self.display_result(self.game.show_result())
+            self.update_plot_data()
+            self.plot_data()
         else:
             self.display_winner(self.game.announce_winner())
+            
             self.button_next_round.config(state=tk.DISABLED)
             self.button_skip.config(state=tk.DISABLED)
+            self.button_start.config(state=tk.NORMAL)
+            self.update_plot_data()
+            self.plot_data()
 
 
     def skip_to_final_result(self):
@@ -130,11 +168,13 @@ class GameGUI:
             self.game.next_generation()
             self.game.reset_player_money()
             self.game.start()
+            self.update_plot_data()
         self.display_result(self.game.show_result())
         self.display_winner(self.game.announce_winner())
         self.button_start.config(state=tk.NORMAL)
         self.button_skip.config(state=tk.DISABLED)
         self.button_next_round.config(state=tk.DISABLED)
+        self.plot_data()
 
 
     def display_result(self, result):
