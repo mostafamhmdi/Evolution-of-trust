@@ -5,12 +5,12 @@ from Players import CopyCat, Selfish, Generous, Grudger, Detective, Simpleton, C
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import matplotlib.pyplot as plt
 
+
 class GameGUI:
     def __init__(self, master):
         self.master = master
         self.master.title("Trust of Evolution Game")
 
-        # Labels and Entries for user input
         self.label_players = tk.Label(master, text="How many players do you want to have:")
         self.label_players.grid(row=0, column=0, padx=10, pady=5, sticky="w")
         self.entry_players = tk.Entry(master)
@@ -66,25 +66,51 @@ class GameGUI:
         self.entry_random = tk.Entry(master)
         self.entry_random.grid(row=10, column=1, padx=10, pady=5)
 
-        # Button to start the game
+        self.label_ch_ch = tk.Label(master, text="Cheat-Cheat payoff: ")
+        self.label_ch_ch.grid(row=11, column=0, padx=10, pady=5, sticky="w")
+        self.entry_ch_ch = tk.Entry(master)
+        self.entry_ch_ch.grid(row=11, column=1, padx=10, pady=5)
+
+        self.label_c_c = tk.Label(master, text="Cooperate-Cooperate payoff: ")
+        self.label_c_c.grid(row=12, column=0, padx=10, pady=5, sticky="w")
+        self.entry_c_c = tk.Entry(master)
+        self.entry_c_c.grid(row=12, column=1, padx=10, pady=5)
+
+        self.label_c_ch = tk.Label(master, text="Cooperate-Cheat payoff (COOPERATE): ")
+        self.label_c_ch.grid(row=13, column=0, padx=10, pady=5, sticky="w")
+        self.entry_c_ch = tk.Entry(master)
+        self.entry_c_ch.grid(row=13, column=1, padx=10, pady=5)
+
+        self.label_ch_c = tk.Label(master, text="Cheat-Cooperate payoff (CHEAT): ")
+        self.label_ch_c.grid(row=14, column=0, padx=10, pady=5, sticky="w")
+        self.entry_ch_c = tk.Entry(master)
+        self.entry_ch_c.grid(row=14, column=1, padx=10, pady=5)
+
         self.button_start = tk.Button(master, text="Start Game", command=self.start_game)
-        self.button_start.grid(row=11, column=0, columnspan=2, padx=10, pady=10,sticky='w')
+        self.button_start.grid(row=15, column=0, columnspan=2, padx=10, pady=10,sticky='w')
 
         self.button_next_round = tk.Button(master, text="Next Round", command=self.show_next_round, state=tk.DISABLED)
-        self.button_next_round.grid(row=11, column=1, columnspan=1, padx=10, pady=10,sticky = 'E')
-
+        self.button_next_round.grid(row=15, column=1, columnspan=1, padx=10, pady=10,sticky = 'E')
+        # Similar buttons can be added for other entry fields
         self.button_skip = tk.Button(master, text="Skip", command=self.skip_to_final_result, state=tk.DISABLED)
-        self.button_skip.grid(row=11, column=2, columnspan=1, padx=10, pady=10,sticky = "E")
+        self.button_skip.grid(row=15, column=2, columnspan=1, padx=10, pady=10,sticky = "E")
 
-        # Label to display the game result
-        self.result_label = tk.Label(master, text="", wraplength=400)
-        self.result_label.grid(row=12, column=0, columnspan=2, padx=10, pady=5)
+
+
+        
+
+        # self.result_label = tk.Label(master, text="", wraplength=400)
+        # self.result_label.grid(row=12, column=0, columnspan=2, padx=10, pady=5)
 
 
         self.rounds = []
         self.player_counts = []
         self.player_money = []
+        self.player_counts_dict = {}
         self.plot_index = 0
+        self.player_counts_2 ={}
+        self.player_mean={}
+        
     
 
 
@@ -102,7 +128,10 @@ class GameGUI:
             num_simpleton = int(self.entry_simpleton.get())
             num_copykitten = int(self.entry_copykitten.get())
             num_random = int(self.entry_random.get())
-
+            ch_ch= int(self.entry_ch_ch.get())
+            c_c = int(self.entry_c_c.get())
+            c_ch= int(self.entry_c_ch.get())
+            ch_c = int(self.entry_ch_c.get())
             if num_players <= 0 or num_rounds <= 0 or num_replace <= 0:
                 raise ValueError("All values must be positive integers.")
         except ValueError as e:
@@ -110,32 +139,94 @@ class GameGUI:
             return
 
 
-        self.game = Game(num_players, num_rounds, num_replace, num_generous, num_selfish, num_copycat, num_grudger, num_detective, num_simpleton, num_copykitten, num_random)
+        self.game = Game(num_players, num_rounds, num_replace, num_generous, num_selfish, num_copycat, num_grudger, num_detective, num_simpleton, num_copykitten, num_random,ch_ch,c_c,c_ch,ch_c)
         self.game.start()
-        self.display_result(self.game.show_result())
+        # self.display_result(self.game.show_result())
         self.button_next_round.config(state=tk.NORMAL)
         self.button_skip.config(state=tk.NORMAL)
         self.button_start.config(state=tk.DISABLED)
+        self.update_plot_data()
+        self.plot_data()
 
 
     def plot_data(self):
-        fig, axs = plt.subplots(3, 2, figsize=(6, 8)) 
-        axs[0, 0].plot(self.rounds, self.player_counts)
-        axs[0, 0].set_title('Player Counts')
-        axs[0, 1].plot(self.rounds, self.player_money)
-        axs[0, 1].set_title('Player Money')
-        # Add more plots as needed
-        plt.tight_layout()
+        fig, axs = plt.subplots(1, 2, figsize=(6,7)) 
+        
+        player_types = [player.__class__.__name__ for player in self.game.players]
+        player_counts = {player_type: player_types.count(player_type) for player_type in set(player_types)}
 
-        # Convert matplotlib figure to Tkinter-compatible canvas
+        counts_per_round = {player_type: {self.rounds[-1]: player_types.count(player_type)} for player_type in player_types}
+        self.player_counts_2[self.rounds[-1]] =counts_per_round
+        randomshit=self.player_counts_2 
+        player_types = list(player_counts.keys())
+        counts = list(player_counts.values())
+        axs[0].bar(player_types, counts, color='skyblue')
+        axs[0].set_xticklabels(player_types, rotation=45)
+        axs[0].set_title('Player Counts')
+    
+        mean_money = {}
+        for player_type in set(player_types):
+            money_sum = sum(player.money for player in self.game.players if player.__class__.__name__ == player_type)
+            player_count = player_counts[player_type]
+            mean_money[player_type] = money_sum / player_count
+
+
+        self.player_mean[self.rounds[-1]] = mean_money
+        randomshit2=self.player_mean
+        mean_money_values = list(mean_money.values())
+        axs[1].bar(player_types, mean_money_values, color='skyblue')
+        axs[1].set_xticklabels(player_types, rotation=45)
+        axs[1].set_title('Players Money')
+
         canvas = FigureCanvasTkAgg(fig, master=self.master)
         canvas.draw()
-        canvas.get_tk_widget().grid(row=0, column=6, rowspan=15)
+        canvas.get_tk_widget().grid(row=0, column=3, rowspan=18, columnspan=4 )
 
         # Add toolbar
         toolbar = NavigationToolbar2Tk(canvas, self.master)
         toolbar.update()
-        canvas.get_tk_widget().grid(row=0, column=6, rowspan=15)
+        canvas.get_tk_widget().grid(row=0, column=3, rowspan=18 ,columnspan=4)
+
+
+
+        fig2, axs2 = plt.subplots(2, 1, figsize=(6, 7))
+        player_y = {}
+        x_values = sorted(randomshit.keys())
+        for round_number, round_data in randomshit.items():
+            for player_type, player_data in round_data.items():
+                if player_type not in player_y:
+                    player_y[player_type] = [0] * len(randomshit)
+                player_y[player_type][round_number - 1] = player_data.get(round_number, 0)
+
+        for player_type, y_values in player_y.items():
+            axs2[0].plot(x_values, y_values, label=player_type)
+        axs2[0].set_title('Player Counts per Round')
+        axs2[0].legend()
+
+
+
+        x_values_mean = list(randomshit2.keys())
+        player_types = set()
+        for round_data in randomshit2.values():
+            player_types.update(round_data.keys())
+        for player_type in player_types:
+            y_values = [round_data.get(player_type, 0) for round_data in randomshit2.values()]
+            axs2[1].plot(x_values, y_values, label=player_type)
+
+        axs2[1].set_title('Player Counts per Round')
+        axs2[1].legend()
+
+
+        canvas2 = FigureCanvasTkAgg(fig2, master=self.master)
+        canvas2.draw()
+        canvas2.get_tk_widget().grid(row=0, column=30, rowspan=18 ,columnspan=4)
+
+        # Add toolbar
+        toolbar2 = NavigationToolbar2Tk(canvas2, self.master)
+        toolbar2.update()
+        canvas2.get_tk_widget().grid(row=0, column=30, rowspan=18,columnspan=4 )
+
+
 
     def update_plot_data(self):
         self.plot_index += 1
@@ -150,7 +241,7 @@ class GameGUI:
             self.game.next_generation()
             self.game.reset_player_money()
             self.game.start()
-            self.display_result(self.game.show_result())
+            # self.display_result(self.game.show_result())
             self.update_plot_data()
             self.plot_data()
         else:
@@ -162,19 +253,18 @@ class GameGUI:
             self.update_plot_data()
             self.plot_data()
 
-
     def skip_to_final_result(self):
         while len(set(type(player) for player in self.game.players)) > 1:
             self.game.next_generation()
             self.game.reset_player_money()
             self.game.start()
-            self.update_plot_data()
-        self.display_result(self.game.show_result())
+        # self.display_result(self.game.show_result())
         self.display_winner(self.game.announce_winner())
         self.button_start.config(state=tk.NORMAL)
         self.button_skip.config(state=tk.DISABLED)
         self.button_next_round.config(state=tk.DISABLED)
-        self.plot_data()
+        self.update_plot_data()
+        self.plot_data() 
 
 
     def display_result(self, result):
@@ -182,11 +272,12 @@ class GameGUI:
 
     def display_winner(self, winner):
         winner_label = tk.Label(self.master, text=winner)
-        winner_label.grid(row=14, column=0, columnspan=2, padx=10, pady=5)
+        winner_label.config(fg="red", font=("Arial", 12, "bold"))
+        winner_label.grid(row=17, column=0, columnspan=2, padx=10, pady=5)
 
 
 class Game:
-    def __init__(self, num_players, num_rounds, num_replace,num_generous,num_selfish,num_copycat,num_grudger,num_detective,num_simpleton,num_copykitten,num_random):
+    def __init__(self, num_players, num_rounds, num_replace,num_generous,num_selfish,num_copycat,num_grudger,num_detective,num_simpleton,num_copykitten,num_random,ch_ch,c_c,c_ch,ch_c):
         self.players = []
         self.num_rounds = num_rounds
         self.num_players = num_players
@@ -199,6 +290,10 @@ class Game:
         self.num_simpleton = num_simpleton
         self.num_copykitten = num_copykitten
         self.num_random = num_random
+        self.ch_ch = ch_ch
+        self.c_c = c_c
+        self.c_ch =c_ch
+        self.ch_c= ch_c
         self.create_players()
 
     def create_players(self):
@@ -235,17 +330,17 @@ class Game:
                     action2 = player2.perform_action(player1_last_action, round_number)
 
                     if action1 == "Cooperate" and action2 == "Cooperate":
-                        player1.money += 2
-                        player2.money += 2
+                        player1.money += self.c_c
+                        player2.money += self.c_c
                     elif action1 == "Cooperate" and action2 == "Betray":
-                        player1.money += -1
-                        player2.money += 3
+                        player1.money += self.c_ch
+                        player2.money += self.ch_c
                     elif action1 == "Betray" and action2 == "Cooperate":
-                        player1.money += 3
-                        player2.money += -1
+                        player1.money += self.ch_c
+                        player2.money += self.c_ch
                     elif action1 == "Betray" and action2 == "Betray":
-                        player1.money += 0
-                        player2.money += 0
+                        player1.money += self.ch_ch
+                        player2.money += self.ch_ch
 
                     player1_last_action = action1  
                     player2_last_action = action2
