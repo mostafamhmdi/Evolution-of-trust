@@ -30,12 +30,12 @@ class Game:
                 self.num_generous = int(input("Enter the number of Generous players: "))
                 self.num_selfish = 0 if self.num_generous == self.num_players else int(input("Enter the number of Selfish players: "))
                 self.num_copycat = 0 if self.num_generous + self.num_selfish == self.num_players else int(input("Enter the number of CopyCat players: "))
-                # self.num_grudger = 0 if self.num_generous + self.num_selfish + self.num_copycat == self.num_players else int(input("Enter the number of Grudger players: "))
-                # self.num_detective = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger == self.num_players else int(input("Enter the number of Detective players: "))
-                # self.num_simpleton = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective == self.num_players else int(input("Enter the number of Simpleton players: "))
-                # self.num_copykitten = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton == self.num_players else int(input("Enter the number of Copykitten players: "))
-                # self.num_random = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton + self.num_copykitten== self.num_players else int(input("Enter the number of Random players: "))
-                self.num_rlplayer = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton + self.num_copykitten + self.num_random== self.num_players else int(input("Enter the number of Random players: "))
+                self.num_grudger = 0 if self.num_generous + self.num_selfish + self.num_copycat == self.num_players else int(input("Enter the number of Grudger players: "))
+                self.num_detective = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger == self.num_players else int(input("Enter the number of Detective players: "))
+                self.num_simpleton = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective == self.num_players else int(input("Enter the number of Simpleton players: "))
+                self.num_copykitten = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton == self.num_players else int(input("Enter the number of Copykitten players: "))
+                self.num_random = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton + self.num_copykitten== self.num_players else int(input("Enter the number of Random players: "))
+                self.num_rlplayer = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton + self.num_copykitten + self.num_random== self.num_players else int(input("Enter the number of smart players: "))
                 self.ch_Ch = int(input("Cheat-Cheat payoff: "))
                 self.c_c = int(input("Cooperate-Cooperate payoff: "))
                 self.c_ch= int(input("Cooperate-Cheat payoff (COOPERATE): "))
@@ -185,6 +185,9 @@ class Game:
                 elif isinstance(player, RandomPlayer):
                     new_players.append(RandomPlayer(f"RandomPlayer Player {self.num_random + 1}"))
                     self.num_random += 1    
+                elif isinstance(player, RLPlayer):
+                    new_players.append(RLPlayer(f"RLPlayer Player {self.num_rlplayer + 1}"))
+                    self.num_rlplayer += 1    
                 
 
             self.players = [player for player in self.players if player not in very_poors]+new_players

@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import random
 from Players import CopyCat, Selfish, Generous, Grudger, Detective, Simpleton, Copykitten,RandomPlayer
+from RLagent import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
@@ -67,34 +68,39 @@ class GameGUI:
         self.entry_random = tk.Entry(master)
         self.entry_random.grid(row=10, column=1, padx=10, pady=5)
 
+        self.label_smart = tk.Label(master, text="Enter the number of Smart players: ")
+        self.label_smart.grid(row=11    , column=0, padx=10, pady=5, sticky="w")
+        self.entry_smart = tk.Entry(master)
+        self.entry_smart.grid(row=11, column=1, padx=10, pady=5)
+
         self.label_ch_ch = tk.Label(master, text="Cheat-Cheat payoff: ")
-        self.label_ch_ch.grid(row=11, column=0, padx=10, pady=5, sticky="w")
+        self.label_ch_ch.grid(row=12, column=0, padx=10, pady=5, sticky="w")
         self.entry_ch_ch = tk.Entry(master)
-        self.entry_ch_ch.grid(row=11, column=1, padx=10, pady=5)
+        self.entry_ch_ch.grid(row=12, column=1, padx=10, pady=5)
 
         self.label_c_c = tk.Label(master, text="Cooperate-Cooperate payoff: ")
-        self.label_c_c.grid(row=12, column=0, padx=10, pady=5, sticky="w")
+        self.label_c_c.grid(row=13, column=0, padx=10, pady=5, sticky="w")
         self.entry_c_c = tk.Entry(master)
-        self.entry_c_c.grid(row=12, column=1, padx=10, pady=5)
+        self.entry_c_c.grid(row=13, column=1, padx=10, pady=5)
 
         self.label_c_ch = tk.Label(master, text="Cooperate-Cheat payoff (COOPERATE): ")
-        self.label_c_ch.grid(row=13, column=0, padx=10, pady=5, sticky="w")
+        self.label_c_ch.grid(row=14, column=0, padx=10, pady=5, sticky="w")
         self.entry_c_ch = tk.Entry(master)
-        self.entry_c_ch.grid(row=13, column=1, padx=10, pady=5)
+        self.entry_c_ch.grid(row=14, column=1, padx=10, pady=5)
 
         self.label_ch_c = tk.Label(master, text="Cheat-Cooperate payoff (CHEAT): ")
-        self.label_ch_c.grid(row=14, column=0, padx=10, pady=5, sticky="w")
+        self.label_ch_c.grid(row=15, column=0, padx=10, pady=5, sticky="w")
         self.entry_ch_c = tk.Entry(master)
-        self.entry_ch_c.grid(row=14, column=1, padx=10, pady=5)
+        self.entry_ch_c.grid(row=15, column=1, padx=10, pady=5)
 
         self.button_start = tk.Button(master, text="Start Game", command=self.start_game)
-        self.button_start.grid(row=15, column=0, columnspan=2, padx=10, pady=10,sticky='w')
+        self.button_start.grid(row=16, column=0, columnspan=2, padx=10, pady=10,sticky='w')
 
         self.button_next_round = tk.Button(master, text="Next Round", command=self.show_next_round, state=tk.DISABLED)
-        self.button_next_round.grid(row=15, column=1, columnspan=1, padx=10, pady=10,sticky = 'E')
+        self.button_next_round.grid(row=16, column=1, columnspan=1, padx=10, pady=10,sticky = 'E')
         # Similar buttons can be added for other entry fields
         self.button_skip = tk.Button(master, text="Skip", command=self.skip_to_final_result, state=tk.DISABLED)
-        self.button_skip.grid(row=15, column=2, columnspan=1, padx=10, pady=10,sticky = "E")
+        self.button_skip.grid(row=16, column=2, columnspan=1, padx=10, pady=10,sticky = "E")
 
 
         self.rounds = []
@@ -122,6 +128,7 @@ class GameGUI:
             num_simpleton = int(self.entry_simpleton.get())
             num_copykitten = int(self.entry_copykitten.get())
             num_random = int(self.entry_random.get())
+            num_smart = int(self.entry_smart.get())
             ch_ch= int(self.entry_ch_ch.get())
             c_c = int(self.entry_c_c.get())
             c_ch= int(self.entry_c_ch.get())
@@ -133,7 +140,7 @@ class GameGUI:
             return
 
 
-        self.game = Game(num_players, num_rounds, num_replace, num_generous, num_selfish, num_copycat, num_grudger, num_detective, num_simpleton, num_copykitten, num_random,ch_ch,c_c,c_ch,ch_c)
+        self.game = Game(num_players, num_rounds, num_replace, num_generous, num_selfish, num_copycat, num_grudger, num_detective, num_simpleton, num_copykitten, num_random,num_smart,ch_ch,c_c,c_ch,ch_c)
         self.game.start()
         self.button_next_round.config(state=tk.NORMAL)
         self.button_skip.config(state=tk.NORMAL)
@@ -161,6 +168,8 @@ class GameGUI:
         player_types = list(player_counts.keys())
         counts = list(player_counts.values())
         ax1.bar(player_types, counts, color='skyblue')
+        for i in range(len(player_types)):
+            ax1.text(i, counts[i], str(counts[i]), ha='center', va='bottom')
         ax1.set_xticklabels(player_types, rotation=30)
         ax1.set_title('Player Counts')
         
@@ -174,8 +183,10 @@ class GameGUI:
         randomshit2=self.player_mean
         mean_money_values = list(mean_money.values())
         ax2.bar(player_types, mean_money_values, color='skyblue')
+        for i in range(len(player_types)):
+            ax2.text(i, mean_money_values[i], str(mean_money_values[i]), ha='center', va='bottom')
         ax2.set_xticklabels(player_types, rotation=30)
-        ax2.set_title('Players Money')
+        ax2.set_title('Group Mean Money')
 
         player_y = {}
         x_values = sorted(randomshit.keys())
@@ -186,7 +197,7 @@ class GameGUI:
                 player_y[player_type][round_number - 1] = player_data.get(round_number, 0)
 
         for player_type, y_values in player_y.items():
-            ax3.plot(x_values, y_values, label=player_type)
+            ax3.plot(x_values, y_values,marker='.', label=player_type)
         ax3.set_title('Player Counts per Round')
         ax3.legend()
 
@@ -197,9 +208,9 @@ class GameGUI:
             player_types.update(round_data.keys())
         for player_type in player_types:
             y_values = [round_data.get(player_type, 0) for round_data in randomshit2.values()]
-            ax4.plot(x_values, y_values, label=player_type)
+            ax4.plot(x_values, y_values,marker='.', label=player_type)
 
-        ax4.set_title('Player Counts per Round')
+        ax4.set_title('Group Mean Money per Round')
         ax4.legend()
 
         fig.tight_layout(pad=5.0)
@@ -259,11 +270,11 @@ class GameGUI:
     def display_winner(self, winner):
         winner_label = tk.Label(self.master, text=winner)
         winner_label.config(fg="red", font=("Arial", 12, "bold"))
-        winner_label.grid(row=17, column=0, columnspan=2, padx=10, pady=5)
+        winner_label.grid(row=18, column=0, columnspan=2, padx=10, pady=5)
 
 
 class Game:
-    def __init__(self, num_players, num_rounds, num_replace,num_generous,num_selfish,num_copycat,num_grudger,num_detective,num_simpleton,num_copykitten,num_random,ch_ch,c_c,c_ch,ch_c):
+    def __init__(self, num_players, num_rounds, num_replace,num_generous,num_selfish,num_copycat,num_grudger,num_detective,num_simpleton,num_copykitten,num_random,num_smart,ch_ch,c_c,c_ch,ch_c):
         self.players = []
         self.num_rounds = num_rounds
         self.num_players = num_players
@@ -276,6 +287,7 @@ class Game:
         self.num_simpleton = num_simpleton
         self.num_copykitten = num_copykitten
         self.num_random = num_random
+        self.num_smart = num_smart
         self.ch_ch = ch_ch
         self.c_c = c_c
         self.c_ch =c_ch
@@ -299,7 +311,10 @@ class Game:
         for i in range(self.num_copykitten):
             self.players.append(Copykitten(f"Copykitten Player {i+1}"))
         for i in range(self.num_random):
-            self.players.append(RandomPlayer(f"RandomPlayer Player {i+1}"))            
+            self.players.append(RandomPlayer(f"RandomPlayer Player {i+1}"))
+        for i in range(self.num_smart):
+            self.players.append(RLPlayer(f"RLPlayer Player {i+1}"))     
+
 
     def start(self):
         for i in range(len(self.players)):
@@ -314,23 +329,31 @@ class Game:
                 for round_number in range(1, self.num_rounds + 1):
                     action1 = player1.perform_action(player2_last_action, round_number)
                     action2 = player2.perform_action(player1_last_action, round_number)
+                    
 
-                    if action1 == "Cooperate" and action2 == "Cooperate":
-                        player1.money += self.c_c
-                        player2.money += self.c_c
-                    elif action1 == "Cooperate" and action2 == "Betray":
-                        player1.money += self.c_ch
-                        player2.money += self.ch_c
-                    elif action1 == "Betray" and action2 == "Cooperate":
-                        player1.money += self.ch_c
-                        player2.money += self.c_ch
-                    elif action1 == "Betray" and action2 == "Betray":
-                        player1.money += self.ch_ch
-                        player2.money += self.ch_ch
+
+                    if isinstance(player1, RLPlayer):
+                        reward1 = self.get_reward(action1, action2)
+                        player1.update_q_table(reward1)
+                    if isinstance(player2, RLPlayer):
+                        reward2 = self.get_reward(action2, action1)
+                        player2.update_q_table(reward2)
+
+                    player1.money += self.get_reward(action1, action2)
+                    player2.money += self.get_reward(action2, action1)
 
                     player1_last_action = action1  
                     player2_last_action = action2
 
+    def get_reward(self, action1, action2):
+        if action1 == "Cooperate" and action2 == "Cooperate":
+            return self.c_c
+        elif action1 == "Cooperate" and action2 == "Betray":
+            return self.c_ch
+        elif action1 == "Betray" and action2 == "Cooperate":
+            return self.ch_c
+        elif action1 == "Betray" and action2 == "Betray":
+            return self.ch_ch 
     def show_result(self):
         result = "Final Results:\n"
         for player in self.players:
@@ -386,7 +409,7 @@ class Game:
             for player in reaches[:self.num_replace]:
                 random_number = random.randint(1, 50)
                 if random_number == 26:
-                    players=['Generous','Selfish','CopyCat','Grudger','Detective','Simpleton','Copykitten','RandomPlayer']
+                    players=self.players
                     random_player = random.choice(players)
                     if random_player =='CopyCat':
                         new_players.append(CopyCat(f"CopyCat Player {self.num_copycat + 1}"))
@@ -411,7 +434,10 @@ class Game:
                         self.num_copykitten += 1  
                     elif random_player =='RandomPlayer':
                         new_players.append(RandomPlayer(f"RandomPlayer Player {self.num_random + 1}"))
-                        self.num_random += 1 
+                        self.num_random += 1
+                    elif random_player =='RLPlayer':
+                        new_players.append(RLPlayer(f"RLPlayer Player {self.num_smart + 1}"))
+                        self.num_smart += 1 
                 else:
                     if isinstance(player, CopyCat):
                         new_players.append(CopyCat(f"CopyCat Player {self.num_copycat + 1}"))
@@ -436,7 +462,10 @@ class Game:
                         self.num_copykitten += 1  
                     elif isinstance(player, RandomPlayer):
                         new_players.append(RandomPlayer(f"RandomPlayer Player {self.num_random + 1}"))
-                        self.num_random += 1    
+                        self.num_random += 1
+                    elif isinstance(player, RLPlayer):
+                        new_players.append(RLPlayer(f"RLPlayer Player {self.num_smart + 1}"))
+                        self.num_smart += 1    
                 
 
             self.players = [player for player in self.players if player not in very_poors]+new_players
@@ -463,6 +492,8 @@ class Game:
             return "Winners are Copykitten"
         elif isinstance(player, RandomPlayer):
             return "Winners are RandomPlayer"
+        elif isinstance(player, RLPlayer):
+            return "Winners are Smarts"
 
 
 def main():
