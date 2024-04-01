@@ -4,6 +4,7 @@ import random
 from Players import CopyCat, Selfish, Generous, Grudger, Detective, Simpleton, Copykitten,RandomPlayer
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
 
 
 class GameGUI:
@@ -96,13 +97,6 @@ class GameGUI:
         self.button_skip.grid(row=15, column=2, columnspan=1, padx=10, pady=10,sticky = "E")
 
 
-
-        
-
-        # self.result_label = tk.Label(master, text="", wraplength=400)
-        # self.result_label.grid(row=12, column=0, columnspan=2, padx=10, pady=5)
-
-
         self.rounds = []
         self.player_counts = []
         self.player_money = []
@@ -141,55 +135,48 @@ class GameGUI:
 
         self.game = Game(num_players, num_rounds, num_replace, num_generous, num_selfish, num_copycat, num_grudger, num_detective, num_simpleton, num_copykitten, num_random,ch_ch,c_c,c_ch,ch_c)
         self.game.start()
-        # self.display_result(self.game.show_result())
         self.button_next_round.config(state=tk.NORMAL)
         self.button_skip.config(state=tk.NORMAL)
         self.button_start.config(state=tk.DISABLED)
         self.update_plot_data()
         self.plot_data()
 
+    
 
     def plot_data(self):
-        fig, axs = plt.subplots(1, 2, figsize=(6,7)) 
+        fig = plt.Figure(figsize=(12, 9))
+        gs = GridSpec(3, 4, figure=fig)
+
+        ax1 = fig.add_subplot(gs[0, :2])
+        ax2 = fig.add_subplot(gs[0, 2:])
+        ax3 = fig.add_subplot(gs[1, :])
+        ax4 = fig.add_subplot(gs[2 , :])
         
         player_types = [player.__class__.__name__ for player in self.game.players]
         player_counts = {player_type: player_types.count(player_type) for player_type in set(player_types)}
 
         counts_per_round = {player_type: {self.rounds[-1]: player_types.count(player_type)} for player_type in player_types}
-        self.player_counts_2[self.rounds[-1]] =counts_per_round
-        randomshit=self.player_counts_2 
+        self.player_counts_2[self.rounds[-1]] = counts_per_round
+        randomshit=self.player_counts_2
         player_types = list(player_counts.keys())
         counts = list(player_counts.values())
-        axs[0].bar(player_types, counts, color='skyblue')
-        axs[0].set_xticklabels(player_types, rotation=45)
-        axs[0].set_title('Player Counts')
-    
+        ax1.bar(player_types, counts, color='skyblue')
+        ax1.set_xticklabels(player_types, rotation=30)
+        ax1.set_title('Player Counts')
+        
         mean_money = {}
         for player_type in set(player_types):
             money_sum = sum(player.money for player in self.game.players if player.__class__.__name__ == player_type)
             player_count = player_counts[player_type]
             mean_money[player_type] = money_sum / player_count
 
-
         self.player_mean[self.rounds[-1]] = mean_money
         randomshit2=self.player_mean
         mean_money_values = list(mean_money.values())
-        axs[1].bar(player_types, mean_money_values, color='skyblue')
-        axs[1].set_xticklabels(player_types, rotation=45)
-        axs[1].set_title('Players Money')
+        ax2.bar(player_types, mean_money_values, color='skyblue')
+        ax2.set_xticklabels(player_types, rotation=30)
+        ax2.set_title('Players Money')
 
-        canvas = FigureCanvasTkAgg(fig, master=self.master)
-        canvas.draw()
-        canvas.get_tk_widget().grid(row=0, column=3, rowspan=18, columnspan=4 )
-
-        # Add toolbar
-        toolbar = NavigationToolbar2Tk(canvas, self.master)
-        toolbar.update()
-        canvas.get_tk_widget().grid(row=0, column=3, rowspan=18 ,columnspan=4)
-
-
-
-        fig2, axs2 = plt.subplots(2, 1, figsize=(6, 7))
         player_y = {}
         x_values = sorted(randomshit.keys())
         for round_number, round_data in randomshit.items():
@@ -199,10 +186,9 @@ class GameGUI:
                 player_y[player_type][round_number - 1] = player_data.get(round_number, 0)
 
         for player_type, y_values in player_y.items():
-            axs2[0].plot(x_values, y_values, label=player_type)
-        axs2[0].set_title('Player Counts per Round')
-        axs2[0].legend()
-
+            ax3.plot(x_values, y_values, label=player_type)
+        ax3.set_title('Player Counts per Round')
+        ax3.legend()
 
 
         x_values_mean = list(randomshit2.keys())
@@ -211,21 +197,21 @@ class GameGUI:
             player_types.update(round_data.keys())
         for player_type in player_types:
             y_values = [round_data.get(player_type, 0) for round_data in randomshit2.values()]
-            axs2[1].plot(x_values, y_values, label=player_type)
+            ax4.plot(x_values, y_values, label=player_type)
 
-        axs2[1].set_title('Player Counts per Round')
-        axs2[1].legend()
+        ax4.set_title('Player Counts per Round')
+        ax4.legend()
 
-
-        canvas2 = FigureCanvasTkAgg(fig2, master=self.master)
-        canvas2.draw()
-        canvas2.get_tk_widget().grid(row=0, column=30, rowspan=18 ,columnspan=4)
+        fig.tight_layout(pad=5.0)
+        
+        canvas = FigureCanvasTkAgg(fig, master=self.master)
+        canvas.draw()
+        canvas.get_tk_widget().grid(row=0, column=4, rowspan=18, columnspan=4)
 
         # Add toolbar
-        toolbar2 = NavigationToolbar2Tk(canvas2, self.master)
-        toolbar2.update()
-        canvas2.get_tk_widget().grid(row=0, column=30, rowspan=18,columnspan=4 )
-
+        toolbar = NavigationToolbar2Tk(canvas, self.master)
+        toolbar.update()
+        canvas.get_tk_widget().grid(row=0, column=4, rowspan=18, columnspan=4)
 
 
     def update_plot_data(self):
@@ -344,9 +330,6 @@ class Game:
 
                     player1_last_action = action1  
                     player2_last_action = action2
-        # print("Final Results:")
-        # for player in self.players:
-        #     print(f"{player.name}: {player.money}")
 
     def show_result(self):
         result = "Final Results:\n"
@@ -401,30 +384,59 @@ class Game:
             new_players = []
         
             for player in reaches[:self.num_replace]:
-                if isinstance(player, CopyCat):
-                    new_players.append(CopyCat(f"CopyCat Player {self.num_copycat + 1}"))
-                    self.num_copycat += 1
-                elif isinstance(player, Selfish):
-                    new_players.append(Selfish(f"Selfish Player {self.num_selfish + 1}"))
-                    self.num_selfish += 1
-                elif isinstance(player, Generous):
-                    new_players.append(Generous(f"Generous Player {self.num_generous + 1}"))
-                    self.num_generous += 1
-                elif isinstance(player, Grudger):
-                    new_players.append(Grudger(f"Grudger Player {self.num_grudger + 1}"))
-                    self.num_grudger += 1
-                elif isinstance(player, Detective):
-                    new_players.append(Detective(f"Detective Player {self.num_detective + 1}"))
-                    self.num_detective += 1
-                elif isinstance(player, Simpleton):
-                    new_players.append(Simpleton(f"Simpleton Player {self.num_simpleton + 1}"))
-                    self.num_simpleton += 1  
-                elif isinstance(player, Copykitten):
-                    new_players.append(Copykitten(f"Copykitten Player {self.num_copykitten + 1}"))
-                    self.num_copykitten += 1  
-                elif isinstance(player, RandomPlayer):
-                    new_players.append(RandomPlayer(f"RandomPlayer Player {self.num_random + 1}"))
-                    self.num_random += 1    
+                random_number = random.randint(1, 50)
+                if random_number == 26:
+                    players=['Generous','Selfish','CopyCat','Grudger','Detective','Simpleton','Copykitten','RandomPlayer']
+                    random_player = random.choice(players)
+                    if random_player =='CopyCat':
+                        new_players.append(CopyCat(f"CopyCat Player {self.num_copycat + 1}"))
+                        self.num_copycat += 1
+                    elif random_player =='Selfish':
+                        new_players.append(Selfish(f"Selfish Player {self.num_selfish + 1}"))
+                        self.num_selfish += 1
+                    elif random_player =='Generous':
+                        new_players.append(Generous(f"Generous Player {self.num_generous + 1}"))
+                        self.num_generous += 1
+                    elif random_player =='Grudger':
+                        new_players.append(Grudger(f"Grudger Player {self.num_grudger + 1}"))
+                        self.num_grudger += 1
+                    elif random_player =='Detective':
+                        new_players.append(Detective(f"Detective Player {self.num_detective + 1}"))
+                        self.num_detective += 1
+                    elif random_player =='Simpleton':
+                        new_players.append(Simpleton(f"Simpleton Player {self.num_simpleton + 1}"))
+                        self.num_simpleton += 1  
+                    elif random_player =='Copykitten':
+                        new_players.append(Copykitten(f"Copykitten Player {self.num_copykitten + 1}"))
+                        self.num_copykitten += 1  
+                    elif random_player =='RandomPlayer':
+                        new_players.append(RandomPlayer(f"RandomPlayer Player {self.num_random + 1}"))
+                        self.num_random += 1 
+                else:
+                    if isinstance(player, CopyCat):
+                        new_players.append(CopyCat(f"CopyCat Player {self.num_copycat + 1}"))
+                        self.num_copycat += 1
+                    elif isinstance(player, Selfish):
+                        new_players.append(Selfish(f"Selfish Player {self.num_selfish + 1}"))
+                        self.num_selfish += 1
+                    elif isinstance(player, Generous):
+                        new_players.append(Generous(f"Generous Player {self.num_generous + 1}"))
+                        self.num_generous += 1
+                    elif isinstance(player, Grudger):
+                        new_players.append(Grudger(f"Grudger Player {self.num_grudger + 1}"))
+                        self.num_grudger += 1
+                    elif isinstance(player, Detective):
+                        new_players.append(Detective(f"Detective Player {self.num_detective + 1}"))
+                        self.num_detective += 1
+                    elif isinstance(player, Simpleton):
+                        new_players.append(Simpleton(f"Simpleton Player {self.num_simpleton + 1}"))
+                        self.num_simpleton += 1  
+                    elif isinstance(player, Copykitten):
+                        new_players.append(Copykitten(f"Copykitten Player {self.num_copykitten + 1}"))
+                        self.num_copykitten += 1  
+                    elif isinstance(player, RandomPlayer):
+                        new_players.append(RandomPlayer(f"RandomPlayer Player {self.num_random + 1}"))
+                        self.num_random += 1    
                 
 
             self.players = [player for player in self.players if player not in very_poors]+new_players
