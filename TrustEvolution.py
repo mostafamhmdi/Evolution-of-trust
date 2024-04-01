@@ -14,6 +14,10 @@ class Game:
         self.num_simpleton=0
         self.num_copykitten=0
         self.num_random=0
+        self.ch_Ch = 0 
+        self.c_c = 0
+        self.c_ch = 0
+        self.ch_c = 0
 
     def create_players(self):
         while True:
@@ -29,6 +33,10 @@ class Game:
                 self.num_simpleton = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective == self.num_players else int(input("Enter the number of Simpleton players: "))
                 self.num_copykitten = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton == self.num_players else int(input("Enter the number of Copykitten players: "))
                 self.num_random = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton + self.num_copykitten== self.num_players else int(input("Enter the number of Random players: "))
+                self.ch_Ch = int(input("Cheat-Cheat payoff: "))
+                self.c_c = int(input("Cooperate-Cooperate payoff: "))
+                self.c_ch= int(input("Cooperate-Cheat payoff (COOPERATE): "))
+                self.ch_c= int(input("Cheat-Cooperate payoff (CHEAT): "))
                 break
             except ValueError:
                 print("Please enter a valid number.")
@@ -77,20 +85,20 @@ class Game:
                     action2 = player2.perform_action(player1_last_action,round_number)
 
                     if action1 == "Cooperate" and action2 == "Cooperate":
-                        player1.money += 2
-                        player2.money += 2
+                        player1.money += self.c_c
+                        player2.money += self.c_c
 
                     elif action1 == "Cooperate" and action2 == "Betray":
-                        player1.money += -1
-                        player2.money += 3
+                        player1.money += self.c_ch
+                        player2.money += self.ch_c
 
                     elif action1 == "Betray" and action2 == "Cooperate":
-                        player1.money += 3
-                        player2.money += -1
+                        player1.money += self.ch_c
+                        player2.money += self.c_ch
 
                     elif action1 == "Betray" and action2 == "Betray":
-                        player1.money += 0
-                        player2.money += 0
+                        player1.money += self.ch_Ch
+                        player2.money += self.ch_Ch
 
                     player1_last_action = action1  
                     player2_last_action = action2
