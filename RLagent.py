@@ -47,6 +47,7 @@ class RLPlayer(Player):
         self.q_table[state][self.last_action] = new_q_value
         self.save_q_table("q_table.pkl")
 
+
     def reset(self):
         self.opponent_history = []
         self.last_action = None
