@@ -1,5 +1,5 @@
 import random
-from Players import Player,Generous,Selfish,RandomPlayer,CopyCat,Grudger,Detective,Simpleton,Copykitten
+from Players import Generous,Selfish,RandomPlayer,CopyCat,Grudger,Detective,Simpleton,Copykitten
 from RLagent import *
 class Game:
     def __init__(self):

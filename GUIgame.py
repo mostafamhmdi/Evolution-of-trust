@@ -409,8 +409,9 @@ class Game:
             for player in reaches[:self.num_replace]:
                 random_number = random.randint(1, 50)
                 if random_number == 26:
-                    players=self.players
-                    random_player = random.choice(players)
+                    player_names = [player.__class__.__name__ for player in self.players]
+                    players=set(player_names)
+                    random_player = random.sample(players, 1)[0]
                     if random_player =='CopyCat':
                         new_players.append(CopyCat(f"CopyCat Player {self.num_copycat + 1}"))
                         self.num_copycat += 1

@@ -19,32 +19,28 @@ class RLPlayer(Player):
 
         self.load_q_table("q_table.pkl")
 
-        # Add opponent's last action to history
+  
         self.opponent_history.append(opponent_last_action)
         if len(self.opponent_history) > self.history_length:
-            self.opponent_history.pop(0)  # Remove oldest action if history exceeds length
+            self.opponent_history.pop(0)  
 
-        # Construct state from opponent action history
         state = tuple(self.opponent_history)
 
-        # Select action using epsilon-greedy strategy
         if random.random() < self.epsilon or state not in self.q_table:
             action = random.choice(["Cooperate", "Betray"])
         else:
             action = max(self.q_table[state], key=self.q_table[state].get)
 
-        # Store last action
         self.last_action = action
         return action
 
     def update_q_table(self, reward):
-        # Construct state from opponent action history
+
         state = tuple(self.opponent_history)
 
         if state not in self.q_table:
             self.q_table[state] = {"Cooperate": 0, "Betray": 0}
 
-        # Update Q-value using Q-learning update rule
         prev_q_value = self.q_table[state][self.last_action]
         max_q_value = max(self.q_table[state].values())
         new_q_value = prev_q_value + self.alpha * (reward + self.gamma * max_q_value - prev_q_value)
