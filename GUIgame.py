@@ -73,34 +73,39 @@ class GameGUI:
         self.entry_smart = tk.Entry(master)
         self.entry_smart.grid(row=11, column=1, padx=10, pady=5)
 
+        self.label_smarty = tk.Label(master, text="Enter the number of 2nd Smart players: ")
+        self.label_smarty.grid(row=12    , column=0, padx=10, pady=5, sticky="w")
+        self.entry_smarty = tk.Entry(master)
+        self.entry_smarty.grid(row=12, column=1, padx=10, pady=5)
+
         self.label_ch_ch = tk.Label(master, text="Cheat-Cheat payoff: ")
-        self.label_ch_ch.grid(row=12, column=0, padx=10, pady=5, sticky="w")
+        self.label_ch_ch.grid(row=13, column=0, padx=10, pady=5, sticky="w")
         self.entry_ch_ch = tk.Entry(master)
-        self.entry_ch_ch.grid(row=12, column=1, padx=10, pady=5)
+        self.entry_ch_ch.grid(row=13, column=1, padx=10, pady=5)
 
         self.label_c_c = tk.Label(master, text="Cooperate-Cooperate payoff: ")
-        self.label_c_c.grid(row=13, column=0, padx=10, pady=5, sticky="w")
+        self.label_c_c.grid(row=14, column=0, padx=10, pady=5, sticky="w")
         self.entry_c_c = tk.Entry(master)
-        self.entry_c_c.grid(row=13, column=1, padx=10, pady=5)
+        self.entry_c_c.grid(row=14, column=1, padx=10, pady=5)
 
         self.label_c_ch = tk.Label(master, text="Cooperate-Cheat payoff (COOPERATE): ")
-        self.label_c_ch.grid(row=14, column=0, padx=10, pady=5, sticky="w")
+        self.label_c_ch.grid(row=15, column=0, padx=10, pady=5, sticky="w")
         self.entry_c_ch = tk.Entry(master)
-        self.entry_c_ch.grid(row=14, column=1, padx=10, pady=5)
+        self.entry_c_ch.grid(row=15, column=1, padx=10, pady=5)
 
         self.label_ch_c = tk.Label(master, text="Cheat-Cooperate payoff (CHEAT): ")
-        self.label_ch_c.grid(row=15, column=0, padx=10, pady=5, sticky="w")
+        self.label_ch_c.grid(row=16, column=0, padx=10, pady=5, sticky="w")
         self.entry_ch_c = tk.Entry(master)
-        self.entry_ch_c.grid(row=15, column=1, padx=10, pady=5)
+        self.entry_ch_c.grid(row=16, column=1, padx=10, pady=5)
 
         self.button_start = tk.Button(master, text="Start Game", command=self.start_game)
-        self.button_start.grid(row=16, column=0, columnspan=2, padx=10, pady=10,sticky='w')
+        self.button_start.grid(row=17, column=0, columnspan=2, padx=10, pady=10,sticky='w')
 
         self.button_next_round = tk.Button(master, text="Next Round", command=self.show_next_round, state=tk.DISABLED)
-        self.button_next_round.grid(row=16, column=1, columnspan=1, padx=10, pady=10,sticky = 'E')
+        self.button_next_round.grid(row=17, column=1, columnspan=1, padx=10, pady=10,sticky = 'E')
         # Similar buttons can be added for other entry fields
         self.button_skip = tk.Button(master, text="Skip", command=self.skip_to_final_result, state=tk.DISABLED)
-        self.button_skip.grid(row=16, column=2, columnspan=1, padx=10, pady=10,sticky = "E")
+        self.button_skip.grid(row=17, column=2, columnspan=1, padx=10, pady=10,sticky = "E")
 
 
         self.rounds = []
@@ -129,6 +134,7 @@ class GameGUI:
             num_copykitten = int(self.entry_copykitten.get())
             num_random = int(self.entry_random.get())
             num_smart = int(self.entry_smart.get())
+            num_smarty = int(self.entry_smarty.get())
             ch_ch= int(self.entry_ch_ch.get())
             c_c = int(self.entry_c_c.get())
             c_ch= int(self.entry_c_ch.get())
@@ -140,7 +146,7 @@ class GameGUI:
             return
 
 
-        self.game = Game(num_players, num_rounds, num_replace, num_generous, num_selfish, num_copycat, num_grudger, num_detective, num_simpleton, num_copykitten, num_random,num_smart,ch_ch,c_c,c_ch,ch_c)
+        self.game = Game(num_players, num_rounds, num_replace, num_generous, num_selfish, num_copycat, num_grudger, num_detective, num_simpleton, num_copykitten, num_random,num_smart,num_smarty,ch_ch,c_c,c_ch,ch_c)
         self.game.start()
         self.button_next_round.config(state=tk.NORMAL)
         self.button_skip.config(state=tk.NORMAL)
@@ -199,7 +205,7 @@ class GameGUI:
         for player_type, y_values in player_y.items():
             ax3.plot(x_values, y_values,marker='.', label=player_type)
         ax3.set_title('Player Counts per Round')
-        ax3.legend()
+        ax3.legend(loc='upper left')
 
 
         x_values_mean = list(randomshit2.keys())
@@ -211,7 +217,7 @@ class GameGUI:
             ax4.plot(x_values, y_values,marker='.', label=player_type)
 
         ax4.set_title('Group Mean Money per Round')
-        ax4.legend()
+        ax4.legend(loc='upper left')
 
         fig.tight_layout(pad=5.0)
         
@@ -270,11 +276,11 @@ class GameGUI:
     def display_winner(self, winner):
         winner_label = tk.Label(self.master, text=winner)
         winner_label.config(fg="red", font=("Arial", 12, "bold"))
-        winner_label.grid(row=18, column=0, columnspan=2, padx=10, pady=5)
+        winner_label.grid(row=19, column=0, columnspan=2, padx=10, pady=5)
 
 
 class Game:
-    def __init__(self, num_players, num_rounds, num_replace,num_generous,num_selfish,num_copycat,num_grudger,num_detective,num_simpleton,num_copykitten,num_random,num_smart,ch_ch,c_c,c_ch,ch_c):
+    def __init__(self, num_players, num_rounds, num_replace,num_generous,num_selfish,num_copycat,num_grudger,num_detective,num_simpleton,num_copykitten,num_random,num_smart,num_smarty,ch_ch,c_c,c_ch,ch_c):
         self.players = []
         self.num_rounds = num_rounds
         self.num_players = num_players
@@ -288,11 +294,13 @@ class Game:
         self.num_copykitten = num_copykitten
         self.num_random = num_random
         self.num_smart = num_smart
+        self.num_smarty = num_smarty
         self.ch_ch = ch_ch
         self.c_c = c_c
         self.c_ch =c_ch
         self.ch_c= ch_c
         self.create_players()
+        self.player_names = [player.__class__.__name__ for player in self.players]
 
     def create_players(self):
         
@@ -313,8 +321,10 @@ class Game:
         for i in range(self.num_random):
             self.players.append(RandomPlayer(f"RandomPlayer Player {i+1}"))
         for i in range(self.num_smart):
-            self.players.append(RLPlayer(f"RLPlayer Player {i+1}"))     
-
+            self.players.append(RLPlayer(f"RLPlayer Player {i+1}"))
+        for i in range(self.num_smarty):
+            self.players.append(Smarty(f"Smarty Player {i+1}"))     
+        
 
     def start(self):
         for i in range(len(self.players)):
@@ -336,6 +346,13 @@ class Game:
                         reward1 = self.get_reward(action1, action2)
                         player1.update_q_table(reward1)
                     if isinstance(player2, RLPlayer):
+                        reward2 = self.get_reward(action2, action1)
+                        player2.update_q_table(reward2)
+                    
+                    if isinstance(player1, Smarty):
+                        reward1 = self.get_reward(action1, action2)
+                        player1.update_q_table(reward1)
+                    if isinstance(player2, Smarty):
                         reward2 = self.get_reward(action2, action1)
                         player2.update_q_table(reward2)
 
@@ -409,8 +426,8 @@ class Game:
             for player in reaches[:self.num_replace]:
                 random_number = random.randint(1, 50)
                 if random_number == 26:
-                    player_names = [player.__class__.__name__ for player in self.players]
-                    players=set(player_names)
+                    # player_names = [player.__class__.__name__ for player in self.players]
+                    players=set(self.player_names)
                     random_player = random.sample(players, 1)[0]
                     if random_player =='CopyCat':
                         new_players.append(CopyCat(f"CopyCat Player {self.num_copycat + 1}"))
@@ -439,6 +456,9 @@ class Game:
                     elif random_player =='RLPlayer':
                         new_players.append(RLPlayer(f"RLPlayer Player {self.num_smart + 1}"))
                         self.num_smart += 1 
+                    elif random_player =='Smarty':
+                        new_players.append(Smarty(f"Smarty Player {self.num_smarty + 1}"))
+                        self.num_smarty += 1 
                 else:
                     if isinstance(player, CopyCat):
                         new_players.append(CopyCat(f"CopyCat Player {self.num_copycat + 1}"))
@@ -467,7 +487,9 @@ class Game:
                     elif isinstance(player, RLPlayer):
                         new_players.append(RLPlayer(f"RLPlayer Player {self.num_smart + 1}"))
                         self.num_smart += 1    
-                
+                    elif isinstance(player, Smarty):
+                        new_players.append(Smarty(f"Smarty Player {self.num_smarty + 1}"))
+                        self.num_smarty += 1
 
             self.players = [player for player in self.players if player not in very_poors]+new_players
 
@@ -495,6 +517,8 @@ class Game:
             return "Winners are RandomPlayer"
         elif isinstance(player, RLPlayer):
             return "Winners are Smarts"
+        elif isinstance(player, Smarty):
+            return "Winners are 2nd Smarts"
 
 
 def main():

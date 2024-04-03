@@ -16,6 +16,7 @@ class Game:
         self.num_copykitten=0
         self.num_random=0
         self.num_rlplayer = 0
+        self.num_smarty = 0
         self.ch_Ch = 0 
         self.c_c = 0
         self.c_ch = 0
@@ -36,6 +37,7 @@ class Game:
                 self.num_copykitten = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton == self.num_players else int(input("Enter the number of Copykitten players: "))
                 self.num_random = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton + self.num_copykitten== self.num_players else int(input("Enter the number of Random players: "))
                 self.num_rlplayer = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton + self.num_copykitten + self.num_random== self.num_players else int(input("Enter the number of smart players: "))
+                self.num_smarty = 0 if self.num_generous + self.num_selfish + self.num_copycat + self.num_grudger + self.num_detective + self.num_simpleton + self.num_copykitten + self.num_random + self.num_rlplayer== self.num_players else int(input("Enter the number of 2nd smart players: "))
                 self.ch_Ch = int(input("Cheat-Cheat payoff: "))
                 self.c_c = int(input("Cooperate-Cooperate payoff: "))
                 self.c_ch= int(input("Cooperate-Cheat payoff (COOPERATE): "))
@@ -61,7 +63,9 @@ class Game:
         for i in range(self.num_random):
             self.players.append(RandomPlayer(f"RandomPlayer Player {i+1}"))     
         for i in range(self.num_rlplayer): # Add this
-            self.players.append(RLPlayer(f"RLPlayer Player {i+1}"))       
+            self.players.append(RLPlayer(f"RLPlayer Player {i+1}"))
+        for i in range(self.num_smarty): # Add this
+            self.players.append(Smarty(f"Smarty Player {i+1}"))       
 
     def start(self, iterate_num):
         if iterate_num == 1:
@@ -85,6 +89,13 @@ class Game:
                         reward1 = self.get_reward(action1, action2)
                         player1.update_q_table(reward1)
                     if isinstance(player2, RLPlayer):
+                        reward2 = self.get_reward(action2, action1)
+                        player2.update_q_table(reward2)
+                    
+                    if isinstance(player1, Smarty):
+                        reward1 = self.get_reward(action1, action2)
+                        player1.update_q_table(reward1)
+                    if isinstance(player2, Smarty):
                         reward2 = self.get_reward(action2, action1)
                         player2.update_q_table(reward2)
 
@@ -188,7 +199,9 @@ class Game:
                 elif isinstance(player, RLPlayer):
                     new_players.append(RLPlayer(f"RLPlayer Player {self.num_rlplayer + 1}"))
                     self.num_rlplayer += 1    
-                
+                elif isinstance(player, Smarty):
+                    new_players.append(Smarty(f"Smarty Player {self.num_smarty + 1}"))
+                    self.num_smarty += 1
 
             self.players = [player for player in self.players if player not in very_poors]+new_players
     def reset_player_money(self):
@@ -212,8 +225,10 @@ class Game:
             print("Winners are Simpleton")
         elif isinstance(player, RandomPlayer):
             print("Winners are RandomPlayer")
-
-
+        elif isinstance(player, RLPlayer):
+            print("Winners are Smarts")
+        elif isinstance(player, Smarty):
+            print("Winners are 2nd Smarts")
 
 
 
