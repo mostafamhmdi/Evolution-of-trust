@@ -148,6 +148,7 @@ class GameGUI:
 
         self.game = Game(num_players, num_rounds, num_replace, num_generous, num_selfish, num_copycat, num_grudger, num_detective, num_simpleton, num_copykitten, num_random,num_smart,num_smarty,ch_ch,c_c,c_ch,ch_c)
         self.game.start()
+        self.game.show_result()
         self.button_next_round.config(state=tk.NORMAL)
         self.button_skip.config(state=tk.NORMAL)
         self.button_start.config(state=tk.DISABLED)
