@@ -1,1 +1,3 @@
-# TrustEvolution
+The Evolution of Trust is one of the most famous games in game theory. it can be a simulation of people behavior in a society. in this [link](https://ncase.me/trust/) you can see a really beautifull and helpfull implementation of this game with different players.
+
+I just tried to implement a more simple GUI with same players but by adding two new players which learned using Q-learning algorithm. Q-learning is a machine learning approach that enables a model to iteratively learn and improve over time by taking the correct action. you can download .exe file and play over and over to have better and better players.
